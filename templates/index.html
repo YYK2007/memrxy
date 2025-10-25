@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Memryx Crowd Safety</title>
+  <style>
+    body{font-family:system-ui,Arial,sans-serif;background:#fafafa;margin:20px;color:#111}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+    .pane{background:#fff;border:1px solid #e5e5e5;border-radius:14px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+    h2{margin:8px 0 14px;font-size:18px}
+    .video{width:100%;aspect-ratio:16/9;background:#ddd;border-radius:10px}
+    .row{display:flex;gap:12px;margin-top:12px}
+    button{padding:10px 14px;border-radius:10px;border:1px solid #d0d0d0;background:#eee;cursor:pointer}
+    .primary{background:#111;color:#fff;border-color:#111}
+    .muted{color:#555;font-size:14px;margin-top:8px}
+    .stack{display:flex;flex-direction:column;gap:10px}
+    .rightgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
+    input[type=text]{padding:10px 12px;border-radius:10px;border:1px solid #d0d0d0;width:100%}
+    .log{margin-top:8px;background:#f6f6f6;border-radius:10px;padding:10px;height:160px;overflow:auto;font-size:13px}
+    .pill{display:inline-block;padding:2px 8px;border-radius:9999px;background:#eee;margin-left:8px;font-size:12px}
+  </style>
+</head>
+<body>
+  <div class="grid">
+    <!-- Left: Security -->
+    <div class="pane">
+      <h2>Security Cam Feed <span id="ps" class="pill">{{ 'running' if people_running else 'stopped' }}</span></h2>
+      <div class="video"></div>
+      <div class="row">
+        <button id="startPeople" class="primary">Start</button>
+        <button id="stopPeople">Stop</button>
+      </div>
+      <div class="muted">Safety Log:</div>
+      <div id="log" class="log"></div>
+      <div class="row" style="margin-top:10px;">
+        <button id="reportBtn">Report Hazard</button>
+        <button id="stewardsBtn">Deploy Stewards</button>
+      </div>
+    </div>
+
+    <!-- Right: Missing People -->
+    <div class="pane">
+      <h2>Missing People Report <span id="fs" class="pill">{{ 'running' if face_running else 'stopped' }}</span></h2>
+      <div class="video"></div>
+      <div class="rightgrid">
+        <div class="stack">
+          <div>Missing Person Name:</div>
+          <input id="mpName" type="text" placeholder="name">
+          <input id="mpFile" type="file" accept="image/*">
+          <button id="uploadBtn">Upload Pic</button>
+          <button id="encodeBtn">Encode Pic</button>
+        </div>
+        <div class="stack" style="align-self:end">
+          <button id="startFace" class="primary">Start Face_recognitions</button>
+          <button id="stopFace">Stop Face_recognitions</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+const logDiv=document.getElementById('log');
+const ps=document.getElementById('ps'), fs=document.getElementById('fs');
+
+function addLog(t){const d=document.createElement('div');d.textContent=t;logDiv.prepend(d);}
+async function refreshLog(){const r=await fetch('/safety_log');const arr=await r.json();logDiv.innerHTML='';arr.forEach(addLog);}
+setInterval(refreshLog,1200);refreshLog();
+
+async function post(url, fd){const r=await fetch(url,{method:'POST',body:fd||new FormData()});
+  if(!r.ok){alert(await r.text());return false;}const j=await r.json();
+  if(j.ok===false){alert(j.error||'error');return false;}return true;}
+
+document.getElementById('startPeople').onclick = async () => { if(await post('/start_people')) ps.textContent='running'; };
+document.getElementById('stopPeople').onclick  = async () => { if(await post('/stop_people'))  ps.textContent='stopped'; };
+
+document.getElementById('startFace').onclick   = async () => { if(await post('/start_face'))   fs.textContent='running'; };
+document.getElementById('stopFace').onclick    = async () => { if(await post('/stop_face'))    fs.textContent='stopped'; };
+
+document.getElementById('reportBtn').onclick   = async () => {
+  addLog('Hazard reported.'); // UI-only; spec says no backend action other than logging
+};
+document.getElementById('stewardsBtn').onclick = async () => {
+  addLog('Stewards deployed.'); // UI-only
+};
+
+document.getElementById('uploadBtn').onclick   = async () => {
+  const name=document.getElementById('mpName').value.trim();
+  const file=document.getElementById('mpFile').files[0];
+  if(!name||!file){alert('Enter name and choose a photo.');return;}
+  const fd=new FormData(); fd.append('name',name); fd.append('file',file);
+  await post('/upload_pic', fd); refreshLog();
+};
+document.getElementById('encodeBtn').onclick   = async () => { await post('/encode'); };
+</script>
+</body>
+</html>
