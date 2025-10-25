@@ -27,19 +27,5 @@
 
 ---
 
-## Repository structure
-.
-├── app.py # Flask control panel 
-├── people_count.py # Memryx YOLOv7-tiny + tracker
-├── recognize_faces.py # Frame glasses -> on-device face recognition
-├── encode_face.py # Build encodings.pickle from dataset/
-├── templates/
-│ └── index.html # Web UI
-├── dataset/ # <person_name>/<photos> 
-├── models/ # *.dfp, *.onnx 
-├── security.mp4 # Optional test video 
-└── yolov7.py # Memryx YOLOv7 helper
-
-
 
 
