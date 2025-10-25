@@ -1,4 +1,4 @@
-#Found (Memryx Hackathon)
+## Found (Memryx Hackathon)
 
 **Short abstract:** On-device AI for crowd safety. We use AR glasses + fixed webcams to (1) count people at chokepoints for crowd control and (2) recognize lost individuals to help reunite lost people, all processed on the edge device the glasses are connected to (Memryx acceleration), keeping latency low and data local.
 
@@ -35,7 +35,11 @@
 ├── encode_face.py # Build encodings.pickle from dataset/
 ├── templates/
 │ └── index.html # Web UI
-├── dataset/ # <person_name>/<photos>
-├── models/ # *.dfp, *.onnx (use Git LFS or download separately)
-├── security.mp4 # Optional test video (use LFS)
-└── yolov7.py # Memryx YOLOv7 helper (place Memryx example here)
+├── dataset/ # <person_name>/<photos> 
+├── models/ # *.dfp, *.onnx 
+├── security.mp4 # Optional test video 
+└── yolov7.py # Memryx YOLOv7 helper
+
+
+
+
